@@ -1,0 +1,350 @@
+//*********************************************************************/
+//*        STEP0005 : CHECK IF THE LOAD FILE IS EMPTY                 */
+//*********************************************************************/
+//STEP0005 EXEC PGM=IDCAMS                                              
+//*                                                                     
+//SYSOUT   DD SYSOUT=*                                                  
+//SYSPRINT DD SYSOUT=*                                                  
+//SYSUDUMP DD SYSOUT=*                                                  
+//*                                                                     
+//LOADIN   DD DSN=CSGC.PROD.CS019638.S129.VIN.LOAD(+0),                 
+//         DISP=SHR                                                     
+
+//*********************************************************************/
+//*        STEP0010 : CREATE STAGING TABLE FOR SGCDD15 VIN DIMENSION  */
+//*********************************************************************/
+.SET ERRORLEVEL 3807 SEVERITY 0;                            
+                                                            
+DROP TABLE SGCDS15_FSA_VEH_STG01;                           
+CREATE SET TABLE SGCDS15_FSA_VEH_STG01                      
+     ,NO FALLBACK  , NO BEFORE JOURNAL , NO AFTER JOURNAL   
+     (                                                      
+   GCDS15_VIN_C                   CHAR(17)                  
+  ,GCDS15_VIN_PART_C              CHAR(08)                  
+  ,GCDS15_VIN_SER_C               CHAR(06)                  
+  ,GCDS15_MODEL_YR_C              SMALLINT                  
+  ,GCDS15_VL_FMFE_C               CHAR(05)                  
+  ,GCDS15_VEH_TYP_C               CHAR(01)                  
+  ,GCDS15_WERS_PLNT_C             CHAR(05)                  
+  ,GCDS15_BRAND_C                 CHAR(01)                  
+  ,GCDS15_MFG_SRCE_C              CHAR(03)                  
+  ,GCDS15_SELL_SRCE_C             CHAR(03)                  
+  ,GCDS15_NAVIS_ST_C              CHAR(03)                  
+  ,GCDS15_SOVID_ST_C              CHAR(03)                  
+  ,GCDS15_GEVIS_ST_C              CHAR(03)                  
+ ,GCDS15_SALES_DIV_C             CHAR(01)                                 
+ ,GCDS15_WRN_STRT_Y              DATE        FORMAT 'YYYY/MM/DD'          
+ ,GCDS15_WRN_CNCL_C              CHAR(02)                                 
+ ,GCDS15_PROD_Y                  DATE        FORMAT 'YYYY/MM/DD'          
+ ,GCDS15_VEH_SOLD_Y              DATE        FORMAT 'YYYY/MM/DD'          
+ ,GCDS15_BODY_FMFE_C             CHAR(05)                                 
+ ,GCDS15_ENG_FMFE_C              CHAR(05)                                 
+ ,GCDS15_SPD_FMFE_C              CHAR(05)                                 
+ ,GCDS15_EMIS_FMFE_C             CHAR(05)                                 
+ ,GCDS15_TRAN_FMFE_C             CHAR(05)                                 
+ ,GCDS15_TIRE_FMFE_C             CHAR(05)                                 
+ ,GCDS15_ENG_CALIB_R             CHAR(08)                                 
+ ,GCDS15_ENG_TAG_C               CHAR(07)                                 
+ ,GCDS15_PERM_ASGN_F             CHAR(01)                                 
+ ,GCDS15_PERM_ASGN_Y             DATE        FORMAT 'YYYY/MM/DD'          
+ ,GCDS15_GRSS_VHWT_Q             INTEGER                                  
+ ,GCDS15_NONVDMVIN_F             CHAR(01)                                 
+ ,GCDS15_EEC_C                   CHAR(04)                                 
+ ,GCDS15_VEH_DECAL_C             CHAR(03)                                 
+ ,GCDS15_ORDER_DLR_C             CHAR(16)                                 
+  ,GCDS15_SHIP_DLR_C              CHAR(16)                            
+  ,GCDS15_STOCK_DLR_C             CHAR(16)                            
+  ,GCDS15_SELL_DLR_C              CHAR(16)                            
+  ,GCDS15_UPD_ODS_S               TIMESTAMP(6)                        
+  ,GCDS15_UPDATE_Y                DATE        FORMAT 'YYYY/MM/DD'     
+  ,GCDS15_UPDATE_ID_C             CHAR(8)                             
+      )                                                               
+UNIQUE PRIMARY INDEX (                                                
+   GCDS15_VIN_C                                                       
+      );                                                              
+                                                                      
+SHOW TABLE SGCDS15_FSA_VEH_STG01;                                     
+.IF ACTIVITYCOUNT > 0 THEN .GOTO ALLDONE;                             
+                                                                      
+.LABEL SOMEERR                                                        
+.QUIT 8;                                                              
+                                                                      
+.LABEL ALLDONE                                                        
+
+
+//*********************************************************************/
+//*        STEP0020 : RUN FASTLOAD TO LOAD DATA INTO STAGING TABLE    */
+//*********************************************************************/
+//STEP0020 EXEC PGM=FASTLOAD,PARM='TENACITY=4',                         
+//           REGION=2048K,COND=(0,NE)                                   
+//SYSOUT   DD SYSOUT=*                                                  
+//SYSPRINT DD SYSOUT=*                                                  
+//SYSABEND DD SYSOUT=*                                                  
+//SYSTERM  DD SYSOUT=*                                                  
+//INFILE   DD DSN=CSGC.PROD.CS019638.S120.VIN.LOAD(+0),                 
+//            DISP=SHR                                                  
+ DEFINE                                                              
+   GCDS15_VIN_C                  (CHAR(17))                          
+  ,GCDS15_VIN_PART_C             (CHAR(08))                          
+  ,GCDS15_VIN_SER_C              (CHAR(06))                          
+  ,GCDS15_MODEL_YR_C             (SMALLINT)                          
+  ,GCDS15_VL_FMFE_C              (CHAR(05))                          
+  ,GCDS15_VEH_TYP_C              (CHAR(01))                          
+  ,GCDS15_WERS_PLNT_C            (CHAR(05))                          
+  ,GCDS15_BRAND_C                (CHAR(01))                          
+  ,GCDS15_MFG_SRCE_C             (CHAR(03))                          
+  ,GCDS15_SELL_SRCE_C            (CHAR(03))                          
+  ,GCDS15_NAVIS_ST_C             (CHAR(03))                          
+  ,GCDS15_SOVID_ST_C             (CHAR(03))                          
+  ,GCDS15_GEVIS_ST_C             (CHAR(03))                          
+ ,GCDS15_SALES_DIV_C            (CHAR(01))      
+ ,GCDS15_WRN_STRT_Y             (CHAR(10))      
+ ,GCDS15_WRN_CNCL_C             (CHAR(02))      
+ ,GCDS15_PROD_Y                 (CHAR(10))      
+ ,GCDS15_VEH_SOLD_Y             (CHAR(10))      
+ ,GCDS15_BODY_FMFE_C            (CHAR(05))      
+ ,GCDS15_ENG_FMFE_C             (CHAR(05))      
+ ,GCDS15_SPD_FMFE_C             (CHAR(05))      
+ ,GCDS15_EMIS_FMFE_C            (CHAR(05))      
+ ,GCDS15_TRAN_FMFE_C            (CHAR(05))      
+ ,GCDS15_TIRE_FMFE_C            (CHAR(05))      
+ ,GCDS15_ENG_CALIB_R            (CHAR(08))      
+ ,GCDS15_ENG_TAG_C              (CHAR(07))      
+ ,GCDS15_PERM_ASGN_F            (CHAR(01))      
+ ,GCDS15_PERM_ASGN_Y            (CHAR(10))      
+ ,GCDS15_GRSS_VHWT_Q            (INTEGER)       
+ ,GCDS15_NONVDMVIN_F            (CHAR(01))      
+ ,GCDS15_EEC_C                  (CHAR(04))      
+ ,GCDS15_VEH_DECAL_C            (CHAR(03))      
+ ,GCDS15_ORDER_DLR_C            (CHAR(16))      
+  ,GCDS15_SHIP_DLR_C             (CHAR(16))                  
+  ,GCDS15_STOCK_DLR_C            (CHAR(16))                  
+  ,GCDS15_SELL_DLR_C             (CHAR(16))                  
+  ,GCDS15_UPD_ODS_S              (CHAR(26))                  
+  ,GCDS15_UPDATE_Y               (CHAR(10))                  
+  ,GCDS15_UPDATE_ID_C            (CHAR(8))                   
+ DDNAME=INFILE;                                              
+                                                             
+/*******************************************************/    
+/* SHOW STATEMENT PROVIDES A LISTING IN THE OUTLIST   */     
+/* WHICH TELLS WHAT COLUMNS THE TERADATA READ IN FOR  */     
+/* EACH FIELDS - SO YOU GET COLUMN NAME, OFFSET,      */     
+/* DATA TYPE, AND DATA LENGTH                         */     
+/*******************************************************/    
+SHOW;                                                        
+                                                             
+DROP TABLE   SGCDS15F_ERR1;                                  
+DROP TABLE   SGCDS15F_ERR2;                                  
+BEGIN LOADING SGCDS15_FSA_VEH_STG01                          
+ERRORFILES   SGCDS15F_ERR1,                                  
+             SGCDS15F_ERR2;                                   
+                                                              
+/********************************************************/    
+/* INSERT TELLS WHAT FIELDS TO ENTER INTO THE TABLE BY */     
+/* THE CORRECT NAMES THAT WILL BE USED AND GIVES THE   */     
+/* ORDER THEY WILL BE IN                               */     
+/* VALUES TELLS WHAT THE FIELDS WERE CALLED IN THE     */     
+/* DEFINE (MAY USE "FALSE" NAMES IN THE DEFINE)        */     
+/********************************************************/    
+INSERT INTO SGCDS15_FSA_VEH_STG01                             
+  (                                                           
+   :GCDS15_VIN_C                                              
+  ,:GCDS15_VIN_PART_C                                         
+  ,:GCDS15_VIN_SER_C                                          
+  ,:GCDS15_MODEL_YR_C                                         
+  ,:GCDS15_VL_FMFE_C                                          
+  ,:GCDS15_VEH_TYP_C                                          
+  ,:GCDS15_WERS_PLNT_C                                        
+  ,:GCDS15_BRAND_C                                            
+  ,:GCDS15_MFG_SRCE_C                                         
+ ,:GCDS15_SELL_SRCE_C                                                
+ ,:GCDS15_NAVIS_ST_C                                                 
+ ,:GCDS15_SOVID_ST_C                                                 
+ ,:GCDS15_GEVIS_ST_C                                                 
+ ,:GCDS15_SALES_DIV_C                                                
+ ,:GCDS15_WRN_STRT_Y             (FORMAT 'YYYY-MM-DD')               
+ ,:GCDS15_WRN_CNCL_C                                                 
+ ,:GCDS15_PROD_Y                 (FORMAT 'YYYY-MM-DD')               
+ ,:GCDS15_VEH_SOLD_Y                                                 
+ ,:GCDS15_BODY_FMFE_C                                                
+ ,:GCDS15_ENG_FMFE_C                                                 
+ ,:GCDS15_SPD_FMFE_C                                                 
+ ,:GCDS15_EMIS_FMFE_C                                                
+ ,:GCDS15_TRAN_FMFE_C                                                
+ ,:GCDS15_TIRE_FMFE_C                                                
+ ,:GCDS15_ENG_CALIB_R                                                
+ ,:GCDS15_ENG_TAG_C                                                  
+ ,:GCDS15_PERM_ASGN_F                                                
+ ,:GCDS15_PERM_ASGN_Y            (FORMAT 'YYYY-MM-DD')               
+ ,:GCDS15_GRSS_VHWT_Q                                                
+  ,:GCDS15_NONVDMVIN_F                                    
+  ,:GCDS15_EEC_C                                          
+  ,:GCDS15_VEH_DECAL_C                                    
+  ,:GCDS15_ORDER_DLR_C                                    
+  ,:GCDS15_SHIP_DLR_C                                     
+  ,:GCDS15_STOCK_DLR_C                                    
+  ,:GCDS15_SELL_DLR_C                                     
+  ,:GCDS15_UPD_ODS_S                                      
+  ,:GCDS15_UPDATE_Y               (FORMAT 'YYYY-MM-DD')   
+  ,:GCDS15_UPDATE_ID_C                                    
+  );                                                      
+END LOADING;                                              
+LOGOFF;                                                   
+
+//*********************************************************************/
+//*        STEP0050 : RUN BTEQ TO EXECUTE INSERT/UPDATE MACRO         */
+//*********************************************************************/
+
+show macro
+GCAMP_UPDATE_MACRO.SGCDM17_FSA_VEH_T1_LOAD_C151;
+
+REPLACE MACRO GCAMP_UPDATE_MACRO.SGCDM17_FSA_VEH_T1_LOAD_C151
+(
+ JOBNAME CHAR(8)
+)
+AS
+(
+ UPDATE SGCDD15_FSA_VEH_TBL
+ FROM   SGCDS15_FSA_VEH_STG01 S1
+  SET   GCDD15_VIN_PART_C    = S1.GCDS15_VIN_PART_C
+       ,GCDD15_VIN_SER_C     = S1.GCDS15_VIN_SER_C
+       ,GCPB22_MODEL_YR_C    = S1.GCDS15_MODEL_YR_C
+       ,GCPB22_VL_FMFE_C     = S1.GCDS15_VL_FMFE_C
+       ,GCPB13_VEH_TYP_C     = S1.GCDS15_VEH_TYP_C
+       ,GCPB01_WERS_PLNT_C   = S1.GCDS15_WERS_PLNT_C
+       ,GCPB03_BRAND_C       = S1.GCDS15_BRAND_C
+       ,GCJM16_MFG_SRCE_C    = S1.GCDS15_MFG_SRCE_C
+       ,GCJM16_SELL_SRCE_C   = S1.GCDS15_SELL_SRCE_C
+       ,GCJM16_NAVIS_ST_C    = S1.GCDS15_NAVIS_ST_C
+       ,GCJM16_SOVID_ST_C    = S1.GCDS15_SOVID_ST_C
+       ,GCJM16_GEVIS_ST_C    = S1.GCDS15_GEVIS_ST_C
+       ,GCJM16_SALES_DIV_C   = S1.GCDS15_SALES_DIV_C
+       ,GCJM16_WRN_STRT_Y    = S1.GCDS15_WRN_STRT_Y
+       ,GCJM16_WRN_CNCL_C    = S1.GCDS15_WRN_CNCL_C
+       ,GCJM16_PROD_Y        = S1.GCDS15_PROD_Y
+       ,GCJM16_VEH_SOLD_Y    = S1.GCDS15_VEH_SOLD_Y
+       ,GCJM16_BODY_FMFE_C   = S1.GCDS15_BODY_FMFE_C
+       ,GCJM16_ENG_FMFE_C    = S1.GCDS15_ENG_FMFE_C
+       ,GCJM16_SPD_FMFE_C    = S1.GCDS15_SPD_FMFE_C
+       ,GCJM16_EMIS_FMFE_C   = S1.GCDS15_EMIS_FMFE_C
+       ,GCJM16_TRAN_FMFE_C   = S1.GCDS15_TRAN_FMFE_C
+       ,GCJM16_TIRE_FMFE_C   = S1.GCDS15_TIRE_FMFE_C
+       ,GCJM16_ENG_CALIB_R   = S1.GCDS15_ENG_CALIB_R
+       ,GCJM16_ENG_TAG_C     = S1.GCDS15_ENG_TAG_C
+       ,GCJM16_PERM_ASGN_F   = S1.GCDS15_PERM_ASGN_F
+       ,GCJM16_PERM_ASGN_Y   = S1.GCDS15_PERM_ASGN_Y
+       ,GCJM16_GRSS_VHWT_Q   = S1.GCDS15_GRSS_VHWT_Q
+       ,GCJM16_NONVDMVIN_F   = S1.GCDS15_NONVDMVIN_F
+       ,GCJM16_EEC_C         = S1.GCDS15_EEC_C
+       ,GCJM16_VEH_DECAL_C   = S1.GCDS15_VEH_DECAL_C
+       ,GCJM16_ORDER_DLR_C   = S1.GCDS15_ORDER_DLR_C
+       ,GCJM16_SHIP_DLR_C    = S1.GCDS15_SHIP_DLR_C
+       ,GCJM16_STOCK_DLR_C   = S1.GCDS15_STOCK_DLR_C
+       ,GCJM16_SELL_DLR_C    = S1.GCDS15_SELL_DLR_C
+       ,GCDD15_UPD_ODS_S     = S1.GCDS15_UPD_ODS_S
+       ,GCDD15_UPDATE_Y      = DATE
+       ,GCDD15_UPDATE_ID_C   = :JOBNAME
+ WHERE GCJM16_VIN_C          = S1.GCDS15_VIN_C
+ ;
+);
+
+show macro
+GCAMP_UPDATE_MACRO.SGCDM15_FSA_VEH_T1_LOAD_M152;
+
+REPLACE MACRO GCAMP_UPDATE_MACRO.SGCDM15_FSA_VEH_T1_LOAD_M152
+(
+ JOBNAME CHAR(8)
+)
+AS
+(
+ INSERT INTO SGCDD15_FSA_VEH_TBL
+      (GCJM16_VIN_C
+      ,GCDD15_VIN_PART_C
+      ,GCDD15_VIN_SER_C
+      ,GCPB22_MODEL_YR_C
+      ,GCPB22_VL_FMFE_C
+      ,GCPB13_VEH_TYP_C
+      ,GCPB01_WERS_PLNT_C
+      ,GCPB03_BRAND_C
+      ,GCJM16_MFG_SRCE_C
+      ,GCJM16_SELL_SRCE_C
+      ,GCJM16_NAVIS_ST_C
+      ,GCJM16_SOVID_ST_C
+      ,GCJM16_GEVIS_ST_C
+      ,GCJM16_SALES_DIV_C
+      ,GCJM16_WRN_STRT_Y
+      ,GCJM16_WRN_CNCL_C
+      ,GCJM16_PROD_Y
+      ,GCJM16_VEH_SOLD_Y
+      ,GCJM16_BODY_FMFE_C
+      ,GCJM16_ENG_FMFE_C
+      ,GCJM16_SPD_FMFE_C
+      ,GCJM16_EMIS_FMFE_C
+      ,GCJM16_TRAN_FMFE_C
+      ,GCJM16_TIRE_FMFE_C
+      ,GCJM16_ENG_CALIB_R
+      ,GCJM16_ENG_TAG_C
+      ,GCJM16_PERM_ASGN_F
+      ,GCJM16_PERM_ASGN_Y
+      ,GCJM16_GRSS_VHWT_Q
+      ,GCJM16_NONVDMVIN_F
+      ,GCJM16_EEC_C
+      ,GCJM16_VEH_DECAL_C
+      ,GCJM16_ORDER_DLR_C
+      ,GCJM16_SHIP_DLR_C
+      ,GCJM16_STOCK_DLR_C
+      ,GCJM16_SELL_DLR_C
+      ,GCDD15_UPD_ODS_S
+      ,GCDD15_UPDATE_Y
+      ,GCDD15_UPDATE_ID_C)
+SELECT GCDS15_VIN_C
+      ,GCDS15_VIN_PART_C
+      ,GCDS15_VIN_SER_C
+      ,GCDS15_MODEL_YR_C
+      ,GCDS15_VL_FMFE_C
+      ,GCDS15_VEH_TYP_C
+      ,GCDS15_WERS_PLNT_C
+      ,GCDS15_BRAND_C
+      ,GCDS15_MFG_SRCE_C
+      ,GCDS15_SELL_SRCE_C
+      ,GCDS15_NAVIS_ST_C
+      ,GCDS15_SOVID_ST_C
+      ,GCDS15_GEVIS_ST_C
+      ,GCDS15_SALES_DIV_C
+      ,GCDS15_WRN_STRT_Y
+      ,GCDS15_WRN_CNCL_C
+      ,GCDS15_PROD_Y
+      ,GCDS15_VEH_SOLD_Y
+      ,GCDS15_BODY_FMFE_C
+      ,GCDS15_ENG_FMFE_C
+      ,GCDS15_SPD_FMFE_C
+      ,GCDS15_EMIS_FMFE_C
+      ,GCDS15_TRAN_FMFE_C
+      ,GCDS15_TIRE_FMFE_C
+      ,GCDS15_ENG_CALIB_R
+      ,GCDS15_ENG_TAG_C
+      ,GCDS15_PERM_ASGN_F
+      ,GCDS15_PERM_ASGN_Y
+      ,GCDS15_GRSS_VHWT_Q
+      ,GCDS15_NONVDMVIN_F
+      ,GCDS15_EEC_C
+      ,GCDS15_VEH_DECAL_C
+      ,GCDS15_ORDER_DLR_C
+      ,GCDS15_SHIP_DLR_C
+      ,GCDS15_STOCK_DLR_C
+      ,GCDS15_SELL_DLR_C
+      ,GCDS15_UPD_ODS_S
+      ,DATE
+      ,:JOBNAME
+ FROM SGCDS15_FSA_VEH_STG01 S1
+WHERE  S1.GCDS15_VIN_C
+NOT IN
+       (SELECT GCJM16_VIN_C
+          FROM SGCDD15_FSA_VEH_TBL);
+);
+//*********************************************************************/
+//*        STEP0060 : DROP STAGING TABLE                              */
+//*********************************************************************/
+.SET ERRORLEVEL 3807 SEVERITY 0;           
+                                           
+DROP TABLE SGCDS15_FSA_VEH_STG01;          

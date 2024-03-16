@@ -1,0 +1,80 @@
+begin
+
+declare start_cdc_date1 timestamp;
+declare last_cdc_dt_update timestamp;
+declare ext_cycle_run1 int64;
+declare cutoff_ts timestamp;
+declare ext_cycle_run2 int64;
+
+
+set start_cdc_date1 =  timestamp_sub((select max(last_cdc_dt) from bq_myprj_opr.job_details where load_name = 'cs019608_fsa_veh'), interval 12 hour);
+set cutoff_ts = timestamp_sub((select max(start_ts)from bq_myprj_opr.batch_load_run),interval 15 minute);
+execute immediate "select max(ext_cycle_run)from `bq_myprj_opr.job_run_details` where load_name = 'cs019608_fsa_veh' " into ext_cycle_run1;
+set  ext_cycle_run2 = ifnull(ext_cycle_run1,0) +1 ;
+select ext_cycle_run2 ;
+insert into `bq_myprj_opr.job_run_details`(ext_cycle_run,load_name,project_name,dataset,job_name,target_table,start_cdc_ts,end_cdc_ts,status) values (ext_cycle_run2,'cs019608_fsa_veh','myprj_project_121','`bq_myprj_fdp_extract_sp.cs019608_fsa_veh`','CS019608','sgcdd15_fsa_veh_tbl',start_cdc_date1,cutoff_ts,'inprogress');
+
+create or replace table bq_myprj_stg.cs019608_fsa_veh_src_01 as
+select                                                                         
+          gcjm16_vin_seq_r   as ext_jm16_jm16_vin_seq_r    
+        , gcjm16_vin_c       as ext_jm16_jm16_vin_c        
+        , gcpb22_model_yr_c  as ext_jm16_pb22_model_yr_c   
+        , gcpb22_veh_ln_c    as ext_jm16_pb22_veh_ln_c     
+        , gcpb13_veh_typ_c   as ext_jm16_pb13_veh_typ_c    
+        , gcpb01_wers_plnt_c as ext_jm16_pb01_wers_plnt_c  
+        , gcpb03_brand_c     as ext_jm16_pb03_brand_c      
+        , gcjm16_mfg_srce_c  as ext_jm16_jm16_mfg_srce_c   
+        , gcjm16_sell_srce_c as ext_jm16_jm16_sell_srce_c  
+        , gcjm16_navis_st_c  as ext_jm16_jm16_navis_st_c   
+        , gcjm16_sovid_st_c  as ext_jm16_jm16_sovid_st_c   
+        , gcjm16_gevis_st_c  as ext_jm16_jm16_gevis_st_c   
+        , gcjm16_sales_div_c as ext_jm16_jm16_sales_div_c  
+        , gcjm16_wrn_strt_y  as ext_jm16_jm16_wrn_strt_y   
+        , gcjm16_wrn_cncl_c  as ext_jm16_jm16_wrn_cncl_c   
+        , gcjm16_prod_y      as ext_jm16_jm16_prod_y       
+        , gcjm16_veh_sold_y  as ext_jm16_jm16_veh_sold_y   
+        , gcpb09_body_fmly_c as ext_jm16_pb09_body_fmly_c  
+        , gcpb08_body_feat_c as ext_jm16_pb08_body_feat_c  
+        , gcpb09_eng_fmly_c  as ext_jm16_pb09_eng_fmly_c   
+        , gcpb08_eng_feat_c  as ext_jm16_pb08_eng_feat_c   
+        , gcpb09_spd_fmly_c  as ext_jm16_pb09_spd_fmly_c   
+        , gcpb08_spd_feat_c  as ext_jm16_pb08_spd_feat_c   
+        , gcpb09_emis_fmly_c as ext_jm16_pb09_emis_fmly_c  
+        , gcpb08_emis_feat_c as ext_jm16_pb08_emis_feat_c  
+        , gcpb09_tran_fmly_c as ext_jm16_pb09_tran_fmly_c  
+        , gcpb08_tran_feat_c as ext_jm16_pb08_tran_feat_c  
+        , gcpb09_tire_fmly_c as ext_jm16_pb09_tire_fmly_c  
+        , gcpb08_tire_feat_c as ext_jm16_pb08_tire_feat_c  
+        , gcjm16_eng_calib_r as ext_jm16_jm16_eng_calib_r  
+        , gcjm16_eng_tag_c   as ext_jm16_jm16_eng_tag_c    
+        , gcjm16_perm_asgn_f as ext_jm16_jm16_perm_asgn_f  
+        , gcjm16_perm_asgn_y as ext_jm16_jm16_perm_asgn_y  
+        , gcjm16_grss_vhwt_q as ext_jm16_jm16_grss_vhwt_q  
+        , gcjm16_nonvdmvin_f as ext_jm16_jm16_nonvdmvin_f  
+        , gcjm16_eec_c       as ext_jm16_jm16_eec_c        
+        , gcjm16_veh_decal_c as ext_jm16_jm16_veh_decal_c  
+        , gcjm16_ship_dlr_c  as ext_jm16_ship_dlr_c        
+        , gcjm16_sell_dlr_c  as ext_jm16_sell_dlr_c        
+        , gcjm16_order_dlr_c as ext_jm16_order_dlr_c       
+        , gcjm16_stock_dlr_c as ext_jm16_stock_dlr_c       
+        , gcjm16_update_s    as ext_jm16_jm16_update_s     
+        , current_date       as ext_job_run_date           
+        , current_time       as ext_job_run_time           
+        , 'cs019608'         as ext_job_name               
+        , ext_cycle_run2          as ext_pg01_pg01_extrcycl_n  
+ from      `prj-dfdl-79-myprj-p-0079.bq_79_myprj_lnd_lc_vw.sgcjm16_vin_vw` jm16                                  
+ where     df_bq_update_ts    >= start_cdc_date1 
+ and       df_bq_update_ts    < cutoff_ts ;
+			 
+insert into `bq_myprj_opr.job_run_details`(ext_cycle_run,load_name,project_name,dataset,job_name,target_table,start_cdc_ts,end_cdc_ts,status) values (ext_cycle_run2,'cs019608_fsa_veh','myprj_project_121',
+'`bq_myprj_fdp_extract_sp.cs019608_fsa_veh`','CS019608','sgcdd15_fsa_veh_tbl',start_cdc_date1,cutoff_ts,'success');
+set last_cdc_dt_update= (select max(end_cdc_ts) from bq_myprj_opr.job_run_details where  target_table='sgcdd15_fsa_veh_tbl' and load_name = 'cs019608_fsa_veh' and status = 'success');
+
+update bq_myprj_opr.job_details
+set last_cdc_dt= last_cdc_dt_update
+where load_name = 'cs019608_fsa_veh';	 
+-- exception when error then
+
+-- insert into `bq_myprj_opr.job_run_details`(ext_cycle_run,load_name,project_name,dataset,job_name,target_table,start_cdc_ts,end_cdc_ts,status,error_check) values (ext_cycle_run2,'cs019608_fsa_veh','myprj_project_121',
+-- '`bq_myprj_fdp_extract_sp.cs019608_fsa_veh`','CS019608','sgcdd15_fsa_veh_tbl',start_cdc_date1,cutoff_ts,'failed',@@error.message);
+end

@@ -1,0 +1,282 @@
+1. Run CSGCBQ33
+
+Input: CSGC.PROD.CS019600.S120.FLEET.EXTR
+Output: 
+CSGC.PROD.CS019610.BQ33.FLEET.TRFM
+CSGC.PROD.CS019610.BQ33.FLEET.ERROR
+CSGC.PROD.CS019610.BQ33.FLEET.AUDIT
+
+
+CSGCBQ10:
+---------
+
+Input layout:
+01  EXT-JM04-FLEET-MGMT-REC.                           
+    05 EXT-JM04-JM07-FLEET-C       PIC X(6).           
+    05 EXT-JM04-JM04-FLTMGLOC-C    PIC X(4).           
+    05 EXT-JM04-JM04-REPAIRING-F   PIC X(1).           
+    05 EXT-JM04-JM04-FLT-UPD-Y     PIC X(10).          
+    05 EXT-JM04-JM04-FLT-MGMT-N    PIC X(45).          
+    05 EXT-JM04-JM04-POSTCODE1-C   PIC X(06).          
+    05 EXT-JM04-JM04-POSTCODE2-C   PIC X(04).          
+    05 EXT-JM04-JM04-UPDATE-S      PIC X(26).          
+    05 EXT-JM07-JM07-FLT-ACCT-N    PIC X(30).          
+    05 EXT-JM07-JM07-DELIN-DAY-T   PIC S9(4) USAGE COMP
+    05 EXT-JM07-JM07-DELIN-CNT-Y   PIC X(10).          
+    05 EXT-JM07-JM07-UPDATE-S      PIC X(26).          
+    05 EXT-JOB-RUN-DATE            PIC X(10).          
+    05 EXT-JOB-RUN-TIME            PIC X(08).          
+    05 EXT-JOB-NAME                PIC X(08).          
+    05 EXT-PG01-PG01-EXTRCYCL-N    PIC S9(9) USAGE COMP
+
+01  EXT-TRAILER-COUNT-REC          REDEFINES  
+    EXT-JM04-FLEET-MGMT-REC.                  
+    05 EXT-TRAILER-MSG             PIC X(21). 
+    05 EXT-TRAILER-CNT             PIC 9(15). 
+    05 FILLER                      PIC X(164).
+
+a. Read the Input record.
+
+IF EXT-TRAILER-MSG    =  LIT-TRAILER-MSG              
+   IF EXT-TRAILER-CNT = (WS-RSA-GSAM-READ-CTRA - 1)   
+      CONTINUE                                        
+   ELSE                                               
+         SET  WS-ABEND-NON-DBMS-ERROR  TO   TRUE      
+   END-IF 
+ELSE                                       
+   PERFORM 36100-VALIDATE-TRANSFORM-RECS   
+END-IF                                     
+
+--
+
+IF EXT-JM04-JM07-FLEET-C    = SPACES OR LOW-VALUES   
+   MOVE EXT-JM04-FLEET-MGMT-REC                      
+     TO ERR-JM04-FLEET-MGMT-REC                      
+   MOVE LIT-ERR-1   TO ERR-ERROR-CODE                
+   MOVE MSG-ERR-1   TO ERR-ERROR-MSG                 
+   PERFORM 36300-INSERT-GS-OUT-PCB3                  
+ELSE                                                 
+   IF EXT-JM04-JM04-FLTMGLOC-C = SPACES OR LOW-VALUES
+      MOVE EXT-JM04-FLEET-MGMT-REC                   
+        TO ERR-JM04-FLEET-MGMT-REC                   
+      MOVE LIT-ERR-2   TO ERR-ERROR-CODE             
+      MOVE MSG-ERR-2   TO ERR-ERROR-MSG              
+      PERFORM 36300-INSERT-GS-OUT-PCB3               
+   ELSE                                              
+      PERFORM 36150-TRANSFORM-EXTRACTED-RECS         
+      PERFORM 36200-INSERT-GS-OUT-PCB2               
+   END-IF                                            
+END-IF                                               
+
+
+36150-TRANSFORM-EXTRACTED-RECS.
+     MOVE LIT-ZERO                    TO GCDD06-FLEET-K         
+     MOVE EXT-JM04-JM07-FLEET-C       TO GCDD06-FLEET-C         
+     MOVE EXT-JM04-JM04-FLTMGLOC-C    TO GCDD06-FLTMGLOC-C      
+     MOVE EXT-JM07-JM07-FLT-ACCT-N    TO GCDD06-FLT-ACCT-N      
+     MOVE EXT-JM07-JM07-DELIN-DAY-T   TO GCDD06-DELIN-DAY-T     
+     MOVE EXT-JM07-JM07-DELIN-CNT-Y   TO GCDD06-DELIN-CNT-Y     
+     MOVE EXT-JM04-JM04-REPAIRING-F   TO GCDD06-REPAIRING-F     
+     MOVE EXT-JM04-JM04-FLT-UPD-Y     TO GCDD06-FLT-UPD-Y       
+     MOVE EXT-JM04-JM04-FLT-MGMT-N    TO GCDD06-FLT-MGMT-N      
+                                                                
+     MOVE EXT-JM04-JM04-POSTCODE1-C   TO GCDD06-FLT-POSTCODE1-C 
+     MOVE EXT-JM04-JM04-POSTCODE2-C   TO GCDD06-FLT-POSTCODE2-C 
+                                                                
+     IF EXT-JM07-JM07-UPDATE-S > EXT-JM04-JM04-UPDATE-S         
+        MOVE EXT-JM07-JM07-UPDATE-S   TO WS-TERA-TS-FMT-6       
+
+     ELSE                                                     
+        MOVE EXT-JM04-JM04-UPDATE-S   TO WS-TERA-TS-FMT-6     
+     END-IF                                                   
+                                                              
+     MOVE LIT-SPACE                   TO WS-TERA6-SPACE       
+     MOVE LIT-COLON                   TO WS-TERA6-COLON1      
+                                         WS-TERA6-COLON2      
+     MOVE LIT-PERIOD                  TO WS-TERA6-PERIOD      
+     MOVE WS-TERA-TS-FMT-6            TO GCDD06-UPD-ODS-S     
+                                                              
+     MOVE WS-RSA-DATE-GRP             TO GCDD06-UPDATE-Y      
+     MOVE LIT-CS019610                TO GCDD06-UPDATE-ID-C   
+
+
+Date format change :
+From:2021-07-01-05.32.39.252601
+To  :2021-07-01 05:32:39.252601
+
+Layouts:
+ 01  WS-TERA-TS-FMT-6.                                  
+     05 WS-TERA6-DATE                    PIC X(10).     
+     05 WS-TERA6-SPACE                   PIC X(01).     
+     05 WS-TERA6-HH                      PIC X(02).     
+     05 WS-TERA6-COLON1                  PIC X(01).     
+     05 WS-TERA6-MM                      PIC X(02).     
+     05 WS-TERA6-COLON2                  PIC X(01).     
+     05 WS-TERA6-SS                      PIC X(02).     
+     05 WS-TERA6-PERIOD                  PIC X(01).     
+     05 WS-TERA6-MS                      PIC X(06).     
+	 
+01 GCDD06-FSA-FLEET-REC.                               
+    05 GCDD06-FLEET-K                    PIC S9(9) COMP
+    05 GCDD06-FLEET-C                    PIC X(06).    
+    05 GCDD06-FLTMGLOC-C                 PIC X(04).    
+    05 GCDD06-FLT-ACCT-N                 PIC X(30).    
+    05 GCDD06-DELIN-DAY-T                PIC S9(4) COMP
+    05 GCDD06-DELIN-CNT-Y                PIC X(10).    
+    05 GCDD06-REPAIRING-F                PIC X(01).    
+    05 GCDD06-FLT-UPD-Y                  PIC X(10).    
+    05 GCDD06-FLT-MGMT-N                 PIC X(45).    
+    05 GCDD06-FLT-POSTCODE1-C            PIC X(06).    
+    05 GCDD06-FLT-POSTCODE2-C            PIC X(04).    
+    05 GCDD06-UPD-ODS-S                  PIC X(26).    
+    05 GCDD06-UPDATE-Y                   PIC X(10).    
+    05 GCDD06-UPDATE-ID-C                PIC X(08).    
+
+
+b. Insert transformed file.
+CALL "CBLTDLI"  USING  ISRT                 
+                       GS-OUT-PCB2          
+                       GCDD06-FSA-FLEET-REC 
+
+c. write rejected records.
+
+Rejected file layout:
+01  ERR-JM04-FLEET-MGMT-REC.                           
+    05 ERR-JM04-JM07-FLEET-C       PIC X(6).           
+    05 ERR-JM04-JM04-FLTMGLOC-C    PIC X(4).           
+    05 ERR-JM04-JM04-REPAIRING-F   PIC X(1).           
+    05 ERR-JM04-JM04-FLT-UPD-Y     PIC X(10).          
+    05 ERR-JM04-JM04-FLT-MGMT-N    PIC X(45).          
+    05 ERR-JM04-JM04-POSTCODE1-C   PIC X(06).          
+    05 ERR-JM04-JM04-POSTCODE2-C   PIC X(04).          
+    05 ERR-JM04-JM04-UPDATE-S      PIC X(26).          
+    05 ERR-JM07-JM07-FLT-ACCT-N    PIC X(30).          
+    05 ERR-JM07-JM07-DELIN-DAY-T   PIC S9(4) USAGE COMP
+    05 ERR-JM07-JM07-DELIN-CNT-Y   PIC X(10).          
+    05 ERR-JM07-JM07-UPDATE-S      PIC X(26).          
+    05 ERR-JOB-RUN-DATE            PIC X(10).          
+    05 ERR-JOB-RUN-TIME            PIC X(08).          
+    05 ERR-JOB-NAME                PIC X(08).          
+    05 ERR-PG01-PG01-EXTRCYCL-N    PIC S9(9) USAGE COMP
+    05 ERR-ERROR-CODE              PIC X(01).          
+    05 ERR-ERROR-MSG               PIC X(40).          
+
+36300-INSERT-GS-OUT-PCB3.                                   
+************************************************************
+ THIS PARAGRAPH WILL INSERT RECORD IN GSAM FILE GS-OUT-PCB3 
+ FOR THE ORIGINAL REJECTED FLEET RECORDS                    
+************************************************************
+                                                            
+    IF WS-RSA-GSAM-ISRT-CTRC  =  WS-GSAM-ISRT-CTR2C         
+       CALL "CBLTDLI" USING ISRT                            
+                            GS-OUT-PCB3                     
+                            ERR-JM04-FLEET-MGMT-REC         
+       END-CALL                                             
+
+---------------------------------------------------------------------------------------------------------------------------
+2. Sort the transform file.
+
+
+SORT FIELDS=(05,06,CH,A,                /* FLEET CODE           */ 
+             11,04,CH,A,                /* FLEET MGMT LOC CODE  */ 
+            123,26,CH,D)                /* UPDATE ODS TIMESTAMP */ 
+
+3. Remove Dups:
+
+SORT FIELDS=(05,06,CH,A,                /* FLEET CODE           */ 
+             11,04,CH,A),               /* FLEET MGMT LOC CODE  */ 
+     EQUALS                                                        
+SUM  FIELDS=NONE                        /* DROP DUPLICATES      */ 
+
+4. 
+
+*****************************************************************
+//*  STEP0040 SORTS FLEET TRANSFORM ON DATE ASC, FLEET CODE ASC *
+//***************************************************************
+//STEP0040 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019610.BQ33.FLEET.TRFM(+1),        
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S040.FLEET.TRFM,            
+
+SORT FIELDS=(05,06,CH,A,                /* FLEET CODE           */ 
+             11,04,CH,A,                /* FLEET MGMT LOC CODE  */ 
+            123,26,CH,D)                /* UPDATE ODS TIMESTAMP */ 
+
+
+//***************************************************************
+//*  STEP0050 SORTS FLEET TRANSFORM TO ELIMINATE DUPLICATES     *
+//***************************************************************
+//STEP0050 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019610.S040.FLEET.TRFM,            
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S050.FLEET.LOAD,            
+
+SORT FIELDS=(05,06,CH,A,                /* FLEET CODE           */ 
+             11,04,CH,A),               /* FLEET MGMT LOC CODE  */ 
+     EQUALS                                                        
+SUM  FIELDS=NONE                        /* DROP DUPLICATES      */ 
+
+
+//***************************************************************
+//*  STEP0060 SORTS FLEET PREVIOUS LOAD FILE                    *
+//***************************************************************
+//STEP0060 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019610.S120.FLEET.LOAD(+0),        		-> prev run
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S060.FLEET.LOAD1,           
+
+SORT FIELDS=COPY                 
+OUTFIL OUTREC=(1:1,166,167:C'1') 
+
+
+
+
+//***************************************************************
+//*  STEP0070 SORTS FLEET CURRENT  LOAD FILE                    *
+//***************************************************************
+//STEP0070 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019610.S050.FLEET.LOAD,            
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S070.FLEET.LOAD2,           
+
+SORT FIELDS=COPY                 
+OUTFIL OUTREC=(1:1,166,167:C'2') 
+
+
+//***************************************************************
+//*  STEP0080 SORTS FLEET PREV & CURR ELIMINATING DUPS          *
+//***************************************************************
+//STEP0080 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019610.S060.FLEET.LOAD1,           
+//            DISP=SHR                                           
+//         DD DSN=CSGC.PROD.CS019610.S070.FLEET.LOAD2,           
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S080.FLEET.LOAD3,           
+
+SORT FIELDS=(05,06,CH,A,                /* FLEET CODE           */
+             11,04,CH,A,                /* FLEET MGMT LOC CODE  */
+            123,26,CH,D),               /* UPDATE ODS TIMESTAMP */
+     EQUALS                                                       
+ SUM FIELDS=NONE                                                  
+
+
+//***************************************************************  
+//*  STEP0120 SORTS FLEET OMIT PREVIOUS                         *  
+//***************************************************************  
+//STEP0120 EXEC PGM=SORT,COND=(0,NE)                               
+//SORTIN   DD DSN=CSGC.PROD.CS019610.S080.FLEET.LOAD3,             
+//            DISP=SHR                                             
+//SORTOUT  DD DSN=CSGC.PROD.CS019610.S120.FLEET.LOAD(+1),          
+
+SORT FIELDS=COPY               
+OMIT COND=(167,1,CH,EQ,C'1')   
+OUTFIL OUTREC=(1:1,166)        
+
+Final File	--> CSGC.PROD.CS019610.S120.FLEET.LOAD
+
+123,456,202314, 1
+123,456,202314, 2
+
+
+
+123,456,202315, 2
