@@ -1,0 +1,122 @@
+1. Run CSGCDQ99 to Insert row in KJ01.
+2. Run CSGCBQ93 to prepare extract sql.
+
+Note: Refer CSGBBQ95 and CSGGMQ91 separate document for detailed code logic.
+
+SELECT                                                                         
+           GCJM16_VIN_SEQ_R                                                    
+         , GCJM16_VIN_C                                                        
+         , GCPB22_MODEL_YR_C                                                   
+         , GCPB22_VEH_LN_C                                                     
+         , GCPB13_VEH_TYP_C                                                    
+         , GCPB01_WERS_PLNT_C                                                  
+         , GCPB03_BRAND_C                                                      
+         , GCJM16_MFG_SRCE_C                                                   
+         , GCJM16_SELL_SRCE_C                                                  
+         , GCJM16_NAVIS_ST_C                                                   
+         , GCJM16_SOVID_ST_C                                                   
+         , GCJM16_GEVIS_ST_C                                                   
+         , GCJM16_SALES_DIV_C                                                  
+         , GCJM16_WRN_STRT_Y                                                   
+         , GCJM16_WRN_CNCL_C                                                   
+         , GCJM16_PROD_Y                                                       
+         , GCJM16_VEH_SOLD_Y                                                   
+         , GCPB09_BODY_FMLY_C                                                  
+         , GCPB08_BODY_FEAT_C                                                  
+         , GCPB09_ENG_FMLY_C                                                   
+         , GCPB08_ENG_FEAT_C                                                   
+         , GCPB09_SPD_FMLY_C                                                   
+         , GCPB08_SPD_FEAT_C                                                   
+         , GCPB09_EMIS_FMLY_C                                                  
+         , GCPB08_EMIS_FEAT_C                                                  
+         , GCPB09_TRAN_FMLY_C                                                  
+         , GCPB08_TRAN_FEAT_C                                                  
+         , GCPB09_TIRE_FMLY_C                                                  
+         , GCPB08_TIRE_FEAT_C                                                  
+         , GCJM16_ENG_CALIB_R                                                  
+         , GCJM16_ENG_TAG_C                                                    
+         , GCJM16_PERM_ASGN_F                                                  
+         , GCJM16_PERM_ASGN_Y                                                  
+         , GCJM16_GRSS_VHWT_Q                                                  
+         , GCJM16_NONVDMVIN_F                                                  
+         , GCJM16_EEC_C                                                        
+         , GCJM16_VEH_DECAL_C                                                  
+         , GCJM16_SHIP_DLR_C                                                   
+         , GCJM16_SELL_DLR_C                                                   
+         , GCJM16_ORDER_DLR_C                                                  
+         , GCJM16_STOCK_DLR_C                                                  
+         , GCJM16_UPDATE_S                                                     
+         , CURRENT DATE                                                        
+         , CURRENT TIME                                                        
+         , 'CS019608'                                                          
+      , 000004520                                                              
+     INTO                                                        
+              GCJM16_VIN_SEQ_R                                   
+            , GCJM16_VIN_C                                       
+            , GCPB22_MODEL_YR_C                                  
+            , GCPB22_VEH_LN_C                                    
+            , GCPB13_VEH_TYP_C                                   
+            , GCPB01_WERS_PLNT_C                                 
+            , GCPB03_BRAND_C                                     
+            , GCJM16_MFG_SRCE_C                                  
+            , GCJM16_SELL_SRCE_C                                 
+            , GCJM16_NAVIS_ST_C                                  
+            , GCJM16_SOVID_ST_C                                  
+            , GCJM16_GEVIS_ST_C                                  
+            , GCJM16_SALES_DIV_C                                 
+            , GCJM16_WRN_STRT_Y                                  
+            , GCJM16_WRN_CNCL_C                                  
+            , GCJM16_PROD_Y                                      
+            , GCJM16_VEH_SOLD_Y                                  
+            , GCPB09_BODY_FMLY_C                                 
+            , GCPB08_BODY_FEAT_C                                 
+            , GCPB09_ENG_FMLY_C                                  
+            , GCPB08_ENG_FEAT_C                                  
+            , GCPB09_SPD_FMLY_C                                  
+            , GCPB08_SPD_FEAT_C                                  
+            , GCPB09_EMIS_FMLY_C                                 
+            , GCPB08_EMIS_FEAT_C                                 
+            , GCPB09_TRAN_FMLY_C                                 
+            , GCPB08_TRAN_FEAT_C                                 
+            , GCPB09_TIRE_FMLY_C                                 
+            , GCPB08_TIRE_FEAT_C                                 
+            , GCJM16_ENG_CALIB_R                                 
+            , GCJM16_ENG_TAG_C                                   
+            , GCJM16_PERM_ASGN_F                                 
+            , GCJM16_PERM_ASGN_Y                                 
+            , GCJM16_GRSS_VHWT_Q                                 
+            , GCJM16_NONVDMVIN_F                                 
+            , GCJM16_EEC_C                                       
+            , GCJM16_VEH_DECAL_C                                 
+            , GCJM16_SHIP_DLR_C                                  
+            , GCJM16_SELL_DLR_C                                  
+            , GCJM16_ORDER_DLR_C                                 
+            , GCJM16_STOCK_DLR_C                                 
+            , GCJM16_UPDATE_S TIMESTAMP EXTERNAL(26)             
+            ,                                                    
+            ,                                                    
+            ,                                                    
+            ,                                                    
+                                                                 
+ FROM      LPU@PDB.SGCJM16_VIN                                   
+ WHERE     GCJM16_UPDATE_S    >='2023-08-17-14.45.19.965803'     
+ AND       GCJM16_UPDATE_S    < '2023-08-19-02.45.19.450524'     
+
+
+//***************************************************************  
+//** STEP0120 APPENDS THE TRAILER RECORD WITH ROW COUNTS        *  
+//***************************************************************  
+//STEP0120 EXEC PGM=SORT,COND=(0,NE)                               
+//SORTIN   DD DSN=CSGC.PROD.CS019608.STEP0060.VIN.EXTR,            
+//            DISP=SHR                                             
+//SORTOUT  DD DSN=CSGC.PROD.CS019608.S129.VIN.EXTR(+1),            
+//            DISP=(NEW,CATLG,DELETE),DATACLAS=COMPRESS,           
+//            DCB=(RECFM=FB,LRECL=269),                            
+
+SORT FIELDS=COPY                            
+OUTFIL REMOVECC,OUTREC=(01:1,269),          
+TRAILER1=(1:'TOTAL RECORD COUNTS: ',COUNT15)
+
+//***************************************************************   
+//** STEP0130 EXECUTES CSGCDQ92 TO UPDATE EXTRACT CYCLE RECORD  *   
+//***************************************************************   

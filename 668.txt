@@ -1,0 +1,189 @@
+begin
+declare insert_record_count int64;
+declare update_record_count int64;
+declare ext_cycle_run1 int64;
+
+set ext_cycle_run1 = (select max(ext_cycle_run) from bq_myprj_opr.job_run_details where load_name ='cs019608_fsa_veh' and status = 'success');
+
+truncate table bq_myprj_stg.sgcds15_fsa_veh_stg01;
+insert into bq_myprj_stg.sgcds15_fsa_veh_stg01
+select  
+gcjm16_vin_c    as gcds15_vin_c                      
+,sgcdd15_vin_part_c    as gcds15_vin_part_c                         
+,sgcdd15_vin_ser_c    as gcds15_vin_ser_c           
+,cast(gcpb22_model_yr_c as int64)  as gcds15_model_yr_c          
+,gcpb22_vl_fmfe_c     as gcds15_vl_fmfe_c           
+,gcpb13_veh_typ_c     as gcds15_veh_typ_c           
+,gcpb01_wers_plnt_c   as gcds15_wers_plnt_c         
+,gcpb03_brand_c       as gcds15_brand_c             
+,gcjm16_mfg_srce_c    as gcds15_mfg_srce_c          
+,gcjm16_sell_srce_c   as gcds15_sell_srce_c         
+,gcjm16_navis_st_c    as gcds15_navis_st_c          
+,gcjm16_sovid_st_c    as gcds15_sovid_st_c          
+,gcjm16_gevis_st_c    as gcds15_gevis_st_c          
+,gcjm16_sales_div_c   as gcds15_sales_div_c         
+,gcjm16_wrn_strt_y    as gcds15_wrn_strt_y          
+,gcjm16_wrn_cncl_c    as gcds15_wrn_cncl_c          
+,gcjm16_prod_y        as gcds15_prod_y              
+,gcjm16_veh_sold_y    as gcds15_veh_sold_y          
+,gcpb09_body_fmfe_c   as gcds15_body_fmfe_c         
+,gcpb09_eng_fmfe_c    as gcds15_eng_fmfe_c          
+,gcpb09_spd_fmfe_c    as gcds15_spd_fmfe_c          
+,gcpb09_emis_fmfe_c   as gcds15_emis_fmfe_c         
+,gcpb09_tran_fmfe_c   as gcds15_tran_fmfe_c         
+,gcpb09_tire_fmfe_c   as gcds15_tire_fmfe_c         
+,gcjm16_eng_calib_r   as gcds15_eng_calib_r         
+,gcjm16_eng_tag_c     as gcds15_eng_tag_c           
+,gcjm16_perm_asgn_f   as gcds15_perm_asgn_f         
+,gcjm16_perm_asgn_y   as gcds15_perm_asgn_y         
+,gcjm16_grss_vhwt_q   as gcds15_grss_vhwt_q         
+,gcjm16_nonvdmvin_f   as gcds15_nonvdmvin_f         
+,gcjm16_eec_c         as gcds15_eec_c               
+,gcjm16_veh_decal_c   as gcds15_veh_decal_c         
+,gcjm16_order_dlr_c   as gcds15_order_dlr_c         
+,gcjm16_ship_dlr_c    as gcds15_ship_dlr_c          
+,gcjm16_stock_dlr_c   as gcds15_stock_dlr_c         
+,gcjm16_sell_dlr_c    as gcds15_sell_dlr_c          
+,gcdd15_upd_ods_s     as gcds15_upd_ods_s           
+,gcdd15_update_y      as gcds15_update_y            
+,gcdd15_update_id_c   as gcds15_update_id_c         
+                                     
+from `bq_myprj_stg.cs019638_fsa_veh_tbl_src_all`;
+
+ update bq_myprj_fdp.sgcdd15_fsa_veh_tbl t1
+  set   gcdd15_vin_part_c    = s1.gcds15_vin_part_c
+       ,gcdd15_vin_ser_c     = s1.gcds15_vin_ser_c
+       ,gcpb22_model_yr_c    = s1.gcds15_model_yr_c
+       ,gcpb22_vl_fmfe_c     = s1.gcds15_vl_fmfe_c
+       ,gcpb13_veh_typ_c     = s1.gcds15_veh_typ_c
+       ,gcpb01_wers_plnt_c   = s1.gcds15_wers_plnt_c
+       ,gcpb03_brand_c       = s1.gcds15_brand_c
+       ,gcjm16_mfg_srce_c    = s1.gcds15_mfg_srce_c
+       ,gcjm16_sell_srce_c   = s1.gcds15_sell_srce_c
+       ,gcjm16_navis_st_c    = s1.gcds15_navis_st_c
+       ,gcjm16_sovid_st_c    = s1.gcds15_sovid_st_c
+       ,gcjm16_gevis_st_c    = s1.gcds15_gevis_st_c
+       ,gcjm16_sales_div_c   = s1.gcds15_sales_div_c
+       ,gcjm16_wrn_strt_y    = s1.gcds15_wrn_strt_y
+       ,gcjm16_wrn_cncl_c    = s1.gcds15_wrn_cncl_c
+       ,gcjm16_prod_y        = s1.gcds15_prod_y
+       ,gcjm16_veh_sold_y    = s1.gcds15_veh_sold_y
+       ,gcjm16_body_fmfe_c   = s1.gcds15_body_fmfe_c
+       ,gcjm16_eng_fmfe_c    = s1.gcds15_eng_fmfe_c
+       ,gcjm16_spd_fmfe_c    = s1.gcds15_spd_fmfe_c
+       ,gcjm16_emis_fmfe_c   = s1.gcds15_emis_fmfe_c
+       ,gcjm16_tran_fmfe_c   = s1.gcds15_tran_fmfe_c
+       ,gcjm16_tire_fmfe_c   = s1.gcds15_tire_fmfe_c
+       ,gcjm16_eng_calib_r   = s1.gcds15_eng_calib_r
+       ,gcjm16_eng_tag_c     = s1.gcds15_eng_tag_c
+       ,gcjm16_perm_asgn_f   = s1.gcds15_perm_asgn_f
+       ,gcjm16_perm_asgn_y   = s1.gcds15_perm_asgn_y
+       ,gcjm16_grss_vhwt_q   = s1.gcds15_grss_vhwt_q
+       ,gcjm16_nonvdmvin_f   = s1.gcds15_nonvdmvin_f
+       ,gcjm16_eec_c         = s1.gcds15_eec_c
+       ,gcjm16_veh_decal_c   = s1.gcds15_veh_decal_c
+       ,gcjm16_order_dlr_c   = s1.gcds15_order_dlr_c
+       ,gcjm16_ship_dlr_c    = s1.gcds15_ship_dlr_c
+       ,gcjm16_stock_dlr_c   = s1.gcds15_stock_dlr_c
+       ,gcjm16_sell_dlr_c    = s1.gcds15_sell_dlr_c
+       ,gcdd15_upd_ods_s     = s1.gcds15_upd_ods_s 
+       ,gcdd15_update_y      = current_date()
+       ,gcdd15_update_id_c   = 'cs019668'
+ from   `bq_myprj_stg.sgcds15_fsa_veh_stg01` s1
+ where t1.gcjm16_vin_c          = s1.gcds15_vin_c
+ ;
+set update_record_count= ifnull(@@row_count,0);
+
+ insert into bq_myprj_fdp.sgcdd15_fsa_veh_tbl
+      (gcjm16_vin_c
+      ,gcdd15_vin_part_c
+      ,gcdd15_vin_ser_c
+      ,gcpb22_model_yr_c
+      ,gcpb22_vl_fmfe_c
+      ,gcpb13_veh_typ_c
+      ,gcpb01_wers_plnt_c
+      ,gcpb03_brand_c
+      ,gcjm16_mfg_srce_c
+      ,gcjm16_sell_srce_c
+      ,gcjm16_navis_st_c
+      ,gcjm16_sovid_st_c
+      ,gcjm16_gevis_st_c
+      ,gcjm16_sales_div_c
+      ,gcjm16_wrn_strt_y
+      ,gcjm16_wrn_cncl_c
+      ,gcjm16_prod_y
+      ,gcjm16_veh_sold_y
+      ,gcjm16_body_fmfe_c
+      ,gcjm16_eng_fmfe_c
+      ,gcjm16_spd_fmfe_c
+      ,gcjm16_emis_fmfe_c
+      ,gcjm16_tran_fmfe_c
+      ,gcjm16_tire_fmfe_c
+      ,gcjm16_eng_calib_r
+      ,gcjm16_eng_tag_c
+      ,gcjm16_perm_asgn_f
+      ,gcjm16_perm_asgn_y
+      ,gcjm16_grss_vhwt_q
+      ,gcjm16_nonvdmvin_f
+      ,gcjm16_eec_c
+      ,gcjm16_veh_decal_c
+      ,gcjm16_order_dlr_c
+      ,gcjm16_ship_dlr_c
+      ,gcjm16_stock_dlr_c
+      ,gcjm16_sell_dlr_c
+      ,gcdd15_upd_ods_s
+      ,gcdd15_update_y
+      ,gcdd15_update_id_c)
+select gcds15_vin_c
+      ,gcds15_vin_part_c
+      ,gcds15_vin_ser_c
+      ,gcds15_model_yr_c
+      ,gcds15_vl_fmfe_c
+      ,gcds15_veh_typ_c
+      ,gcds15_wers_plnt_c
+      ,gcds15_brand_c
+      ,gcds15_mfg_srce_c
+      ,gcds15_sell_srce_c
+      ,gcds15_navis_st_c
+      ,gcds15_sovid_st_c
+      ,gcds15_gevis_st_c
+      ,gcds15_sales_div_c
+      ,gcds15_wrn_strt_y
+      ,gcds15_wrn_cncl_c
+      ,gcds15_prod_y
+      ,gcds15_veh_sold_y
+      ,gcds15_body_fmfe_c
+      ,gcds15_eng_fmfe_c
+      ,gcds15_spd_fmfe_c
+      ,gcds15_emis_fmfe_c
+      ,gcds15_tran_fmfe_c
+      ,gcds15_tire_fmfe_c
+      ,gcds15_eng_calib_r
+      ,gcds15_eng_tag_c
+      ,gcds15_perm_asgn_f
+      ,gcds15_perm_asgn_y
+      ,gcds15_grss_vhwt_q
+      ,gcds15_nonvdmvin_f
+      ,gcds15_eec_c
+      ,gcds15_veh_decal_c
+      ,gcds15_order_dlr_c
+      ,gcds15_ship_dlr_c
+      ,gcds15_stock_dlr_c
+      ,gcds15_sell_dlr_c
+      ,gcds15_upd_ods_s 
+      ,current_date()
+      ,'cs019668'
+ from `bq_myprj_stg.sgcds15_fsa_veh_stg01` s1
+where   s1.gcds15_vin_c
+not in
+       (select gcjm16_vin_c
+          from `bq_myprj_fdp.sgcdd15_fsa_veh_tbl`);
+set insert_record_count= ifnull(@@row_count,0);
+
+insert into bq_myprj_opr.job_record_count (ext_cycle_run,load_name ,target_table ,insert_record_count ,update_record_count,rejected_count ,loaded_time ) values(ext_cycle_run1,'cs019608_fsa_veh','sgcdd15_fsa_veh_tbl',insert_record_count,update_record_count,0,current_timestamp());
+
+update bq_myprj_opr.job_run_details
+set end_cdc_ts= current_timestamp()
+where ext_cycle_run = ext_cycle_run1 and load_name = 'cs019608_fsa_veh' and status = 'success'; 
+
+end;

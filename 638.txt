@@ -1,0 +1,122 @@
+begin
+create or replace table bq_myprj_stg.cs019638_fsa_veh_tbl_src_02 as
+   select * except (trdm) 
+from (select *,
+             count(*) over (partition by gcjm16_vin_c 
+             order by gcjm16_vin_c asc) as trdm
+      from ( 
+select distinct gcjm16_vin_c         
+,sgcdd15_vin_part_c   
+,sgcdd15_vin_ser_c    
+,gcpb22_model_yr_c    
+,gcpb22_vl_fmfe_c     
+,gcpb13_veh_typ_c     
+,gcpb01_wers_plnt_c   
+,gcpb03_brand_c       
+,gcjm16_mfg_srce_c    
+,gcjm16_sell_srce_c   
+,gcjm16_navis_st_c    
+,gcjm16_sovid_st_c    
+,gcjm16_gevis_st_c    
+,gcjm16_sales_div_c   
+,gcjm16_wrn_strt_y    
+,gcjm16_wrn_cncl_c    
+,gcjm16_prod_y        
+,gcjm16_veh_sold_y    
+,gcpb09_body_fmfe_c   
+,gcpb09_eng_fmfe_c    
+,gcpb09_spd_fmfe_c    
+,gcpb09_emis_fmfe_c   
+,gcpb09_tran_fmfe_c   
+,gcpb09_tire_fmfe_c   
+,gcjm16_eng_calib_r   
+,gcjm16_eng_tag_c     
+,gcjm16_perm_asgn_f   
+,gcjm16_perm_asgn_y   
+,gcjm16_grss_vhwt_q   
+,gcjm16_nonvdmvin_f   
+,gcjm16_eec_c         
+,gcjm16_veh_decal_c   
+,gcjm16_ship_dlr_c    
+,gcjm16_sell_dlr_c    
+,gcjm16_order_dlr_c   
+,gcjm16_stock_dlr_c   
+,gcdd15_upd_ods_s     
+,gcdd15_update_y      
+,gcdd15_update_id_c 
+,2 as flag  from (
+select
+ext_jm16_jm16_vin_c as gcjm16_vin_c
+,case when substr(ext_jm16_jm16_vin_c,12,6) = '' then '' else substr(ext_jm16_jm16_vin_c,10,8) end as sgcdd15_vin_part_c 
+,case when substr(ext_jm16_jm16_vin_c,12,6) = '' then '' else substr(ext_jm16_jm16_vin_c,12,6)   end as sgcdd15_vin_ser_c
+,ext_jm16_pb22_model_yr_c as gcpb22_model_yr_c
+,concat('VL ',substr(ext_jm16_pb22_veh_ln_c,4,2)) as gcpb22_vl_fmfe_c
+,ext_jm16_pb13_veh_typ_c   as gcpb13_veh_typ_c            
+,ext_jm16_pb01_wers_plnt_c as gcpb01_wers_plnt_c          
+,ext_jm16_pb03_brand_c     as gcpb03_brand_c              
+,ext_jm16_jm16_mfg_srce_c  as gcjm16_mfg_srce_c           
+,ext_jm16_jm16_sell_srce_c as gcjm16_sell_srce_c          
+,ext_jm16_jm16_navis_st_c  as gcjm16_navis_st_c           
+,ext_jm16_jm16_sovid_st_c  as gcjm16_sovid_st_c                                                   
+,ext_jm16_jm16_gevis_st_c  as gcjm16_gevis_st_c                                                                            
+,ext_jm16_jm16_sales_div_c as gcjm16_sales_div_c          
+,ext_jm16_jm16_wrn_strt_y  as gcjm16_wrn_strt_y           
+,ext_jm16_jm16_wrn_cncl_c  as gcjm16_wrn_cncl_c           
+,ext_jm16_jm16_prod_y      as gcjm16_prod_y               
+,ext_jm16_jm16_veh_sold_y  as gcjm16_veh_sold_y 
+,concat(substr(ext_jm16_pb09_body_fmly_c,1,3),substr(ext_jm16_pb08_body_feat_c,4,2)) as gcpb09_body_fmfe_c
+,concat(substr(ext_jm16_pb09_eng_fmly_c,1,3),substr(ext_jm16_pb08_eng_feat_c,4,2)) as gcpb09_eng_fmfe_c
+,concat(substr(ext_jm16_pb09_spd_fmly_c,1,3),substr(ext_jm16_pb08_spd_feat_c,4,2)) as gcpb09_spd_fmfe_c
+,concat(substr(ext_jm16_pb09_emis_fmly_c,1,3),substr(ext_jm16_pb08_emis_feat_c,4,2)) as gcpb09_emis_fmfe_c
+,concat(substr(ext_jm16_pb09_tran_fmly_c,1,3),substr(ext_jm16_pb08_tran_feat_c,4,2)) as gcpb09_tran_fmfe_c
+,concat(substr(ext_jm16_pb09_tire_fmly_c,1,3),substr(ext_jm16_pb08_tire_feat_c,4,2)) as gcpb09_tire_fmfe_c
+,ext_jm16_jm16_eng_calib_r  as gcjm16_eng_calib_r        
+,ext_jm16_jm16_eng_tag_c    as gcjm16_eng_tag_c   
+,ext_jm16_jm16_perm_asgn_f  as gcjm16_perm_asgn_f 
+,ext_jm16_jm16_perm_asgn_y  as gcjm16_perm_asgn_y 
+,ext_jm16_jm16_grss_vhwt_q  as gcjm16_grss_vhwt_q 
+,ext_jm16_jm16_nonvdmvin_f  as gcjm16_nonvdmvin_f 
+,ext_jm16_jm16_eec_c        as gcjm16_eec_c       
+,ext_jm16_jm16_veh_decal_c  as gcjm16_veh_decal_c 
+,ext_jm16_ship_dlr_c        as gcjm16_ship_dlr_c 
+,ext_jm16_sell_dlr_c        as gcjm16_sell_dlr_c 
+,ext_jm16_order_dlr_c       as gcjm16_order_dlr_c
+,ext_jm16_stock_dlr_c       as gcjm16_stock_dlr_c
+,ext_jm16_jm16_update_s     as gcdd15_upd_ods_s
+,current_date()            as gcdd15_update_y   
+,'cs019638'                 as gcdd15_update_id_c
+from bq_myprj_stg.cs019608_fsa_veh_src_01
+order by gcjm16_vin_c ASC , gcdd15_upd_ods_s desc) ) ) WHERE trdm = 1 ;
+
+create or replace table bq_myprj_stg.cs019638_fsa_veh_tbl_src_all as
+select distinct * from (
+select * except (trdm) 
+from (select *,
+             count(*) over (partition by gcjm16_vin_c ,gcdd15_upd_ods_s  
+             order by gcjm16_vin_c ASC ,gcdd15_upd_ods_s  Desc ) as trdm
+      from ( 
+select * from bq_myprj_stg.cs019638_fsa_veh_tbl_src_02_yst
+union all
+select * from bq_myprj_stg.cs019638_fsa_veh_tbl_src_02 
+) as all_records
+order by gcjm16_vin_c ASC ,gcdd15_upd_ods_s  Desc )WHERE trdm=1 
+) where flag = 2;
+
+create or replace table bq_myprj_stg.cs019638_fsa_veh_tbl_src_02_yst as 
+select * from bq_myprj_stg.cs019638_fsa_veh_tbl_src_all ;
+
+update  bq_myprj_stg.cs019638_fsa_veh_tbl_src_02_yst
+set flag=1 
+where flag=2 ;
+-------backup taken for yesterday data
+export data
+  options (
+    uri = 'gs://bkt-tfstate-dfdm-121-myprj-d/cs019638_fsa_veh_backup_' || current_timestamp() || '_*.csv',
+    format = 'csv',
+    overwrite = true,
+    header = true,
+    field_delimiter = ';')
+as (
+  select * from bq_myprj_stg.cs019638_fsa_veh_tbl_src_02_yst
+);
+end;

@@ -1,0 +1,88 @@
+begin
+declare key1 int64;
+declare insert_record_count int64;
+declare update_record_count int64;
+declare ext_cycle_run1 int64;
+
+set ext_cycle_run1 = (select max(ext_cycle_run)from bq_myprj_opr.job_run_details where load_name ='cs019600_fleet' and status = 'success');
+
+truncate table bq_myprj_stg.sgcds06_fsa_fleet_stg01;
+insert into bq_myprj_stg.sgcds06_fsa_fleet_stg01                          
+select 
+gcdd06_fleet_k as gcds06_fleet_k 
+,gcdd06_fleet_c as gcds06_fleet_c
+,gcdd06_fltmgloc_c as gcds06_fltmgloc_c 
+,gcdd06_flt_acct_n as gcds06_flt_acct_n
+,gcdd06_delin_day_t as gcds06_delin_day_t
+,gcdd06_delin_cnt_y as gcds06_delin_cnt_y
+,gcdd06_repairing_f as gcds06_repairing_f
+,gcdd06_flt_upd_y as gcds06_flt_upd_y
+,gcdd06_flt_mgmt_n as gcds06_flt_mgmt_n 
+,gcdd06_flt_postcode1_c  as gcds06_postcode1_c
+,gcdd06_flt_postcode2_c as gcds06_postcode2_c
+,gcdd06_upd_ods_s as gcds06_upd_ods_s
+,gcdd06_update_y as gcds06_update_y
+,gcdd06_update_id_c as gcds06_update_id_c
+from `bq_myprj_stg.cs019610_fleet_src_all`;
+update  bq_myprj_fdp.sgcdd06_fsa_fleet_tbl
+ set   gcdd06_flt_acct_n     =  s1.gcds06_flt_acct_n
+      ,gcdd06_delin_day_t    =  s1.gcds06_delin_day_t
+      ,gcdd06_delin_cnt_y    =  s1.gcds06_delin_cnt_y
+      ,gcdd06_repairing_f    =  s1.gcds06_repairing_f
+      ,gcdd06_flt_upd_y      =  s1.gcds06_flt_upd_y
+      ,gcdd06_flt_mgmt_n     =  s1.gcds06_flt_mgmt_n
+      ,gcdd06_postcode1_c    =  s1.gcds06_postcode1_c
+      ,gcdd06_postcode2_c    =  s1.gcds06_postcode2_c
+      ,gcdd06_upd_ods_s      =  s1.gcds06_upd_ods_s 
+      ,gcdd06_update_y       =  current_date()
+      ,gcdd06_update_id_c    =  'cs019660'
+from    `bq_myprj_stg.sgcds06_fsa_fleet_stg01` s1
+ where trim(gcdd06_fleet_c)        =  trim(s1.gcds06_fleet_c)
+   and trim(gcdd06_fltmgloc_c)     =  trim(s1.gcds06_fltmgloc_c)
+ ;
+set update_record_count= ifnull(@@row_count,0);
+
+   execute immediate  "select case when max(gcdd06_fleet_k) < 0  then 0 when max(gcdd06_fleet_k) = 0  then 0 when max(gcdd06_fleet_k) is null  then 0 else max(gcdd06_fleet_k) end from bq_myprj_fdp.sgcdd06_fsa_fleet_tbl" into key1;
+   select key1;
+ insert into bq_myprj_fdp.sgcdd06_fsa_fleet_tbl
+      (gcdd06_fleet_k
+      ,gcdd06_fleet_c
+      ,gcdd06_fltmgloc_c
+      ,gcdd06_flt_acct_n
+      ,gcdd06_delin_day_t
+      ,gcdd06_delin_cnt_y
+      ,gcdd06_repairing_f
+      ,gcdd06_flt_upd_y
+      ,gcdd06_flt_mgmt_n
+      ,gcdd06_postcode1_c
+      ,gcdd06_postcode2_c
+      ,gcdd06_upd_ods_s
+      ,gcdd06_update_y
+      ,gcdd06_update_id_c)
+select key1 + dense_rank() over (order by s1.gcds06_fleet_c, s1.gcds06_fltmgloc_c asc)       
+      ,gcds06_fleet_c
+      ,gcds06_fltmgloc_c
+      ,gcds06_flt_acct_n
+      ,gcds06_delin_day_t
+      ,gcds06_delin_cnt_y
+      ,gcds06_repairing_f
+      ,gcds06_flt_upd_y
+      ,gcds06_flt_mgmt_n
+      ,gcds06_postcode1_c
+      ,gcds06_postcode2_c
+      ,gcds06_upd_ods_s  
+      ,current_date()
+      ,'cs019660'
+ from bq_myprj_stg.sgcds06_fsa_fleet_stg01 s1
+where concat (trim(s1.gcds06_fleet_c), trim(s1.gcds06_fltmgloc_c))
+not in
+       (select concat (trim(gcds06_fleet_c),trim(gcds06_fltmgloc_c)	)
+          from bq_myprj_fdp.sgcdd06_fsa_fleet_tbl );
+
+set insert_record_count= ifnull(@@row_count,0);
+insert into bq_myprj_opr.job_record_count (ext_cycle_run,load_name ,target_table ,insert_record_count ,update_record_count,rejected_count ,loaded_time ) values(ext_cycle_run1,'cs019600_fleet','sgcdd05_fsa_event_tbl',insert_record_count,update_record_count,0,current_timestamp());
+
+update bq_myprj_opr.job_run_details
+set end_cdc_ts= current_timestamp()
+where ext_cycle_run = ext_cycle_run1 and load_name = 'cs019600_fleet' and status = 'success'; 
+end;

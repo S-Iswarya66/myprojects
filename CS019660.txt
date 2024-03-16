@@ -1,0 +1,191 @@
+1.
+//*        STEP0005 : CHECK IF THE LOAD FILE IS EMPTY                 */
+//*********************************************************************/
+//STEP0005 EXEC PGM=IDCAMS                                              
+//*                                                                     
+//SYSOUT   DD SYSOUT=*                                                  
+//SYSPRINT DD SYSOUT=*                                                  
+//SYSUDUMP DD SYSOUT=*                                                  
+//*                                                                     
+//LOADIN   DD DSN=CSGC.PROD.CS019633.S120.FLEET.LOAD(+0),               
+//         DISP=SHR                                                     
+--------------------------
+2. 
+
+DROP TABLE SGCDS06_FSA_FLEET_STG01;                                     
+CREATE SET TABLE SGCDS06_FSA_FLEET_STG01                                
+     ,NO FALLBACK  , NO BEFORE JOURNAL , NO AFTER JOURNAL               
+     (                                                                  
+   GCDS06_FLEET_K                 INTEGER                               
+  ,GCDS06_FLEET_C                 CHAR(6)           NOT NULL            
+  ,GCDS06_FLTMGLOC_C              CHAR(4)           NOT NULL            
+  ,GCDS06_FLT_ACCT_N              CHAR(30)                              
+  ,GCDS06_DELIN_DAY_T             SMALLINT                              
+  ,GCDS06_DELIN_CNT_Y             DATE                                  
+  ,GCDS06_REPAIRING_F             CHAR(1)                               
+  ,GCDS06_FLT_UPD_Y               DATE                                  
+  ,GCDS06_FLT_MGMT_N              CHAR(45)                              
+  ,GCDS06_POSTCODE1_C             CHAR(6)                               
+  ,GCDS06_POSTCODE2_C             CHAR(4)                               
+  ,GCDS06_UPD_ODS_S               TIMESTAMP(6)                          
+  ,GCDS06_UPDATE_Y                DATE              FORMAT 'YYYY/MM/DD' 
+  ,GCDS06_UPDATE_ID_C             CHAR(8)                    
+      )                                                      
+UNIQUE PRIMARY INDEX (                                       
+   GCDS06_FLEET_C                                            
+ , GCDS06_FLTMGLOC_C                                         
+      );                                                     
+
+3. 
+//*        STEP0020 : RUN FASTLOAD TO LOAD DATA INTO STAGING TABLE    */
+//*********************************************************************/
+//STEP0020 EXEC PGM=FASTLOAD,PARM='TENACITY=4',                         
+//           REGION=2048K,COND=(0,NE)                                   
+//SYSOUT   DD SYSOUT=*                                                  
+//SYSPRINT DD SYSOUT=*                                                  
+//SYSABEND DD SYSOUT=*                                                  
+//SYSTERM  DD SYSOUT=*                                                  
+//INFILE   DD DSN=CSGC.PROD.CS019633.S120.FLEET.LOAD(+0),               
+//            DISP=SHR                                                  
+//SYSIN    DD
+
+DEFINE                                             
+  GCDS06_FLEET_K                (INTEGER)          
+ ,GCDS06_FLEET_C                (CHAR(6))          
+ ,GCDS06_FLTMGLOC_C             (CHAR(4))          
+ ,GCDS06_FLT_ACCT_N             (CHAR(30))         
+ ,GCDS06_DELIN_DAY_T            (SMALLINT)         
+ ,GCDS06_DELIN_CNT_Y            (CHAR(10))         
+ ,GCDS06_REPAIRING_F            (CHAR(1))          
+ ,GCDS06_FLT_UPD_Y              (CHAR(10))         
+ ,GCDS06_FLT_MGMT_N             (CHAR(45))         
+ ,GCDS06_POSTCODE1_C            (CHAR(6))          
+ ,GCDS06_POSTCODE2_C            (CHAR(4))          
+ ,GCDS06_UPD_ODS_S              (CHAR(26))         
+ ,GCDS06_UPDATE_Y               (CHAR(10))         
+  ,GCDS06_UPDATE_ID_C            (CHAR(8))               
+ DDNAME=INFILE;                                          
+                                                         
+/*******************************************************/
+/* SHOW STATEMENT PROVIDES A LISTING IN THE OUTLIST   */ 
+/* WHICH TELLS WHAT COLUMNS THE TERADATA READ IN FOR  */ 
+/* EACH FIELDS - SO YOU GET COLUMN NAME, OFFSET,      */ 
+/* DATA TYPE, AND DATA LENGTH                         */ 
+/*******************************************************/
+SHOW;                                                    
+                                                         
+DROP TABLE   SGCDS06F_ERR1;                              
+DROP TABLE   SGCDS06F_ERR2;                              
+BEGIN LOADING SGCDS06_FSA_FLEET_STG01                    
+ERRORFILES   SGCDS06F_ERR1,                              
+             SGCDS06F_ERR2;                              
+                                                         
+INSERT INTO SGCDS06_FSA_FLEET_STG01                          
+  (                                                          
+   :GCDS06_FLEET_K                                           
+  ,:GCDS06_FLEET_C                                           
+  ,:GCDS06_FLTMGLOC_C                                        
+  ,:GCDS06_FLT_ACCT_N                                        
+  ,:GCDS06_DELIN_DAY_T                                       
+  ,:GCDS06_DELIN_CNT_Y            (FORMAT 'YYYY-MM-DD')      
+  ,:GCDS06_REPAIRING_F                                       
+  ,:GCDS06_FLT_UPD_Y              (FORMAT 'YYYY-MM-DD')      
+  ,:GCDS06_FLT_MGMT_N                                        
+  ,:GCDS06_POSTCODE1_C                                       
+  ,:GCDS06_POSTCODE2_C                                       
+  ,:GCDS06_UPD_ODS_S                                         
+  ,:GCDS06_UPDATE_Y               (FORMAT 'YYYY-MM-DD')      
+  ,:GCDS06_UPDATE_ID_C                                       
+  );                                                         
+
+3. 
+
+//*********************************************************************/
+//*        STEP0050 : RUN BTEQ TO EXECUTE INSERT/UPDATE MACRO         */
+//*********************************************************************/
+
+EXEC GCAMP_UPDATE_MACRO.SGCDM06_FSA_FLEET_T1_LOAD_M060('CS019663');     
+
+UPDATE  SGCDD06_FSA_FLEET_TBL
+ FROM    SGCDS06_FSA_FLEET_STG01 S1
+
+ SET   GCDD06_FLT_ACCT_N     =  S1.GCDS06_FLT_ACCT_N
+      ,GCDD06_DELIN_DAY_T    =  S1.GCDS06_DELIN_DAY_T
+      ,GCDD06_DELIN_CNT_Y    =  S1.GCDS06_DELIN_CNT_Y
+      ,GCDD06_REPAIRING_F    =  S1.GCDS06_REPAIRING_F
+      ,GCDD06_FLT_UPD_Y      =  S1.GCDS06_FLT_UPD_Y
+      ,GCDD06_FLT_MGMT_N     =  S1.GCDS06_FLT_MGMT_N
+      ,GCDD06_POSTCODE1_C    =  S1.GCDS06_POSTCODE1_C
+      ,GCDD06_POSTCODE2_C    =  S1.GCDS06_POSTCODE2_C
+      ,GCDD06_UPD_ODS_S      =  S1.GCDS06_UPD_ODS_S
+      ,GCDD06_UPDATE_Y       =  DATE
+      ,GCDD06_UPDATE_ID_C    =  :JOBNAME
+
+ WHERE GCDD06_FLEET_C        =  S1.GCDS06_FLEET_C
+   AND GCDD06_FLTMGLOC_C     =  S1.GCDS06_FLTMGLOC_C
+ ;
+
+
+ INSERT INTO SGCDD06_FSA_FLEET_TBL
+      (GCDD06_FLEET_K
+      ,GCDD06_FLEET_C
+      ,GCDD06_FLTMGLOC_C
+      ,GCDD06_FLT_ACCT_N
+      ,GCDD06_DELIN_DAY_T
+      ,GCDD06_DELIN_CNT_Y
+      ,GCDD06_REPAIRING_F
+      ,GCDD06_FLT_UPD_Y
+      ,GCDD06_FLT_MGMT_N
+      ,GCDD06_POSTCODE1_C
+      ,GCDD06_POSTCODE2_C
+      ,GCDD06_UPD_ODS_S
+      ,GCDD06_UPDATE_Y
+      ,GCDD06_UPDATE_ID_C)
+SELECT RANK((S1.GCDS06_FLEET_C S1.GCDS06_FLTMGLOC_C) ASC) +
+       MAX_FLEET_KEY
+      ,GCDS06_FLEET_C
+      ,GCDS06_FLTMGLOC_C
+      ,GCDS06_FLT_ACCT_N
+      ,GCDS06_DELIN_DAY_T
+      ,GCDS06_DELIN_CNT_Y
+      ,GCDS06_REPAIRING_F
+      ,GCDS06_FLT_UPD_Y
+      ,GCDS06_FLT_MGMT_N
+      ,GCDS06_POSTCODE1_C
+      ,GCDS06_POSTCODE2_C
+      ,GCDS06_UPD_ODS_S
+      ,DATE
+      ,:JOBNAME
+ FROM SGCDS06_FSA_FLEET_STG01 S1
+   , (
+       SELECT
+         CASE
+           WHEN MAX(GCDD06_FLEET_K) < 0  THEN 0
+           WHEN MAX(GCDD06_FLEET_K) = 0  THEN 0
+           WHEN MAX(GCDD06_FLEET_K) IS NULL  THEN 0
+         ELSE MAX(GCDD06_FLEET_K)
+         END
+       FROM SGCDD06_FSA_FLEET_TBL
+
+     ) DT (MAX_FLEET_KEY)
+WHERE  (S1.GCDS06_FLEET_C, S1.GCDS06_FLTMGLOC_C)
+NOT IN
+       (SELECT GCDD06_FLEET_C, GCDD06_FLTMGLOC_C
+          FROM SGCDD06_FSA_FLEET_TBL);
+);
+
+4. 
+//*********************************************************************/
+//*        STEP0060 : DROP STAGING TABLE                              */
+//*********************************************************************/
+
+DROP TABLE SGCDS06_FSA_FLEET_STG01;      
+
+
+100
+
+100
+101
+102
+102
+200

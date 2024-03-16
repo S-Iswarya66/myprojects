@@ -1,0 +1,192 @@
+1. Run CSGCBQ38 (Note: please find detailed code in separate doc)
+
+Input: CSGC.PROD.CS019608.S129.VIN.EXTR
+Output: 
+CSGC.PROD.CS019638.BQ38.VIN.TRFM
+CSGC.PROD.CS019638.BQ38.VIN.AUDIT
+
+CSGCBQ36:
+---------
+
+Input layout:
+
+01  EXT-JM16-VIN-REC.                              
+    05 EXT-JM16-JM16-VIN-SEQ-R           PIC X(03).
+    05 EXT-JM16-JM16-VIN-C               PIC X(17).
+    05 EXT-JM16-PB22-MODEL-YR-C          PIC X(04).
+    05 EXT-JM16-PB22-VEH-LN-C            PIC X(02).
+    05 EXT-JM16-PB13-VEH-TYP-C           PIC X(01).
+    05 EXT-JM16-PB01-WERS-PLNT-C         PIC X(05).
+    05 EXT-JM16-PB03-BRAND-C             PIC X(01).
+    05 EXT-JM16-JM16-MFG-SRCE-C          PIC X(03).
+    05 EXT-JM16-JM16-SELL-SRCE-C         PIC X(03).
+    05 EXT-JM16-JM16-NAVIS-ST-C          PIC X(03).
+    05 EXT-JM16-JM16-SOVID-ST-C          PIC X(03).
+    05 EXT-JM16-JM16-GEVIS-ST-C          PIC X(03).
+    05 EXT-JM16-JM16-SALES-DIV-C         PIC X(01).
+    05 EXT-JM16-JM16-WRN-STRT-Y          PIC X(10).
+    05 EXT-JM16-JM16-WRN-CNCL-C          PIC X(02).
+    05 EXT-JM16-JM16-PROD-Y              PIC X(10).
+    05 EXT-JM16-JM16-VEH-SOLD-Y          PIC X(10).
+    05 EXT-JM16-PB09-BODY-FMLY-C         PIC X(03).           
+    05 EXT-JM16-PB08-BODY-FEAT-C         PIC X(02).           
+    05 EXT-JM16-PB09-ENG-FMLY-C          PIC X(03).           
+    05 EXT-JM16-PB08-ENG-FEAT-C          PIC X(02).           
+    05 EXT-JM16-PB09-SPD-FMLY-C          PIC X(03).           
+    05 EXT-JM16-PB08-SPD-FEAT-C          PIC X(02).           
+    05 EXT-JM16-PB09-EMIS-FMLY-C         PIC X(03).           
+    05 EXT-JM16-PB08-EMIS-FEAT-C         PIC X(02).           
+    05 EXT-JM16-PB09-TRAN-FMLY-C         PIC X(03).           
+    05 EXT-JM16-PB08-TRAN-FEAT-C         PIC X(02).           
+    05 EXT-JM16-PB09-TIRE-FMLY-C         PIC X(03).           
+    05 EXT-JM16-PB08-TIRE-FEAT-C         PIC X(02).           
+    05 EXT-JM16-JM16-ENG-CALIB-R         PIC X(08).           
+    05 EXT-JM16-JM16-ENG-TAG-C           PIC X(07).           
+    05 EXT-JM16-JM16-PERM-ASGN-F         PIC X(01).           
+    05 EXT-JM16-JM16-PERM-ASGN-Y         PIC X(10).           
+    05 EXT-JM16-JM16-GRSS-VHWT-Q         PIC S9(9) USAGE COMP.
+    05 EXT-JM16-JM16-NONVDMVIN-F         PIC X(01).           
+    05 EXT-JM16-JM16-EEC-C               PIC X(04).           
+    05 EXT-JM16-JM16-VEH-DECAL-C         PIC X(03).           
+    05 EXT-JM16-SHIP-DLR-C               PIC X(16).           
+    05 EXT-JM16-SELL-DLR-C               PIC X(16).           
+    05 EXT-JM16-ORDER-DLR-C              PIC X(16).           
+    05 EXT-JM16-STOCK-DLR-C              PIC X(16).           
+    05 EXT-JM16-JM16-UPDATE-S            PIC X(26).           
+    05 EXT-JOB-RUN-DATE                  PIC X(10).           
+    05 EXT-JOB-RUN-TIME                  PIC X(08).           
+    05 EXT-JOB-NAME                      PIC X(08).           
+    05 EXT-PG01-PG01-EXTRCYCL-N          PIC S9(9) USAGE COMP.
+01  EXT-TRAILER-COUNT-REC                REDEFINES            
+    EXT-JM16-VIN-REC.                                         
+    05 EXT-TRAILER-MSG                   PIC X(21).           
+    05 EXT-TRAILER-CNT                   PIC 9(15).           
+    05 FILLER                            PIC X(233).          
+
+
+
+
+Output layout:
+01  SGCDD15-FSA-VEH-REC.                                      
+    05 GCJM16-VIN-C                      PIC X(17).           
+    05 SGCDD15-VIN-PART-C                PIC X(08).           
+    05 SGCDD15-VIN-SER-C                 PIC X(06).           
+    05 GCPB22-MODEL-YR-C                 PIC S9(4) USAGE COMP.
+    05 GCPB22-VL-FMFE-C                  PIC X(05).           
+    05 GCPB13-VEH-TYP-C                  PIC X(01).           
+    05 GCPB01-WERS-PLNT-C                PIC X(05).           
+    05 GCPB03-BRAND-C                    PIC X(01).           
+    05 GCJM16-MFG-SRCE-C                 PIC X(03).           
+    05 GCJM16-SELL-SRCE-C                PIC X(03).           
+    05 GCJM16-NAVIS-ST-C                 PIC X(03).           
+    05 GCJM16-SOVID-ST-C                 PIC X(03).           
+    05 GCJM16-GEVIS-ST-C                 PIC X(03).           
+    05 GCJM16-SALES-DIV-C                PIC X(01).           
+    05 GCJM16-WRN-STRT-Y                 PIC X(10).           
+    05 GCJM16-WRN-CNCL-C                 PIC X(02).           
+    05 GCJM16-PROD-Y                     PIC X(10).           
+    05 GCJM16-VEH-SOLD-Y                 PIC X(10).           
+    05 GCPB09-BODY-FMFE-C                PIC X(05).           
+    05 GCPB09-ENG-FMFE-C                 PIC X(05).           
+    05 GCPB09-SPD-FMFE-C                 PIC X(05).           
+    05 GCPB09-EMIS-FMFE-C                PIC X(05).           
+    05 GCPB09-TRAN-FMFE-C                PIC X(05).           
+    05 GCPB09-TIRE-FMFE-C                PIC X(05).           
+    05 GCJM16-ENG-CALIB-R                PIC X(08).           
+    05 GCJM16-ENG-TAG-C                  PIC X(07).           
+    05 GCJM16-PERM-ASGN-F                PIC X(01).           
+    05 GCJM16-PERM-ASGN-Y                PIC X(10).           
+    05 GCJM16-GRSS-VHWT-Q                PIC S9(9) USAGE COMP.
+    05 GCJM16-NONVDMVIN-F                PIC X(01).           
+    05 GCJM16-EEC-C                      PIC X(04).           
+    05 GCJM16-VEH-DECAL-C                PIC X(03).           
+    05 GCJM16-ORDER-DLR-C                PIC X(16).           
+    05 GCJM16-SHIP-DLR-C                 PIC X(16).           
+    05 GCJM16-STOCK-DLR-C                PIC X(16).           
+    05 GCJM16-SELL-DLR-C                 PIC X(16).           
+    05 GCDD15-UPD-ODS-S                  PIC X(26).           
+    05 GCDD15-UPDATE-Y                   PIC X(10).           
+    05 GCDD15-UPDATE-ID-C                PIC X(08).                                                                       
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+//***************************************************************     
+//*  STEP0040 SORTS VIN   TRANSFORM ON DATE ASC, VIN NUMBER ASC *     
+//***************************************************************     
+//STEP0040 EXEC PGM=SORT,COND=(0,NE)                                  
+//*                                                                   
+//SORTIN   DD DSN=CSGC.PROD.CS019638.BQ38.VIN.TRFM(+1),               
+//            DISP=SHR                                                
+//*                                                                   
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S040.VIN.TRFM,                   
+//            DISP=(NEW,CATLG,DELETE),DATACLAS=COMPRESS,              
+SORT FIELDS=(01,17,CH,A,                /* VIN NUMBER           */ 
+            226,26,CH,D)                /* UPDATE ODS TIMESTAMP */ 
+
+//***************************************************************
+//*  STEP0050 SORTS VIN   TRANSFORM TO ELIMINATE DUPLICATES     *
+//***************************************************************
+//STEP0050 EXEC PGM=SORT,COND=(0,NE)                             
+//*                                                              
+//SORTIN   DD DSN=CSGC.PROD.CS019638.S040.VIN.TRFM,              
+//            DISP=SHR                                           
+//*                                                              
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S050.VIN.LOAD,              
+//            DISP=(NEW,CATLG,DELETE),DATACLAS=COMPRESS,         
+SORT FIELDS=(01,17,CH,A),               /* VIN NUMBER           */ 
+     EQUALS                                                        
+SUM  FIELDS=NONE                        /* DROP DUPLICATES      */ 
+
+//***************************************************************
+//*  STEP0060 SORTS VIN PREVIOUS LOAD FILE                      *
+//***************************************************************
+//STEP0060 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019638.S120.VIN.LOAD(+0),          
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S060.VIN.LOAD1,             
+//            DISP=(NEW,CATLG,DELETE),                           
+SORT FIELDS=COPY                   
+OUTFIL OUTREC=(1:1,269,270:C'1')   
+
+//***************************************************************
+//*  STEP0070 SORTS VIN CURRENT    LOAD FILE                    *
+//***************************************************************
+//STEP0070 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019638.S050.VIN.LOAD,              
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S070.VIN.LOAD2,             
+//            DISP=(NEW,CATLG,DELETE),                           
+SORT FIELDS=COPY                
+OUTFIL OUTREC=(1:1,269,270:C'2')
+
+
+//***************************************************************
+//*  STEP0080 SORTS VIN PREV & CURR ELIMINATING DUPS            *
+//***************************************************************
+//STEP0080 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019638.S060.VIN.LOAD1,             
+//            DISP=SHR                                           
+//         DD DSN=CSGC.PROD.CS019638.S070.VIN.LOAD2,             
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S080.VIN.LOAD3,             
+//            DISP=(NEW,CATLG,DELETE),                           
+SORT FIELDS=(01,17,CH,A,                /* VIN NUMBER           */  
+            226,26,CH,D),               /* UPDATE ODS TIMESTAMP */  
+     EQUALS                                                         
+ SUM FIELDS=NONE                                                    
+
+
+//***************************************************************
+//*  STEP0120 SORTS VIN OMIT PREVIOUS                           *
+//***************************************************************
+//STEP0120 EXEC PGM=SORT,COND=(0,NE)                             
+//SORTIN   DD DSN=CSGC.PROD.CS019638.S080.VIN.LOAD3,             
+//            DISP=SHR                                           
+//SORTOUT  DD DSN=CSGC.PROD.CS019638.S120.VIN.LOAD(+1),          
+//            DISP=(NEW,CATLG,DELETE),                           
+
+SORT FIELDS=COPY            
+OMIT COND=(270,1,CH,EQ,C'1')
+OUTFIL OUTREC=(1:1,269)     
+
